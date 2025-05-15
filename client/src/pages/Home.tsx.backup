@@ -1,0 +1,1387 @@
+import { useEffect, useRef } from 'react';
+import { Link } from 'wouter';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
+import { gsap } from 'gsap';
+
+export default function Home() {
+  const gsapHeadingRef = useRef<HTMLHeadingElement>(null);
+  const ietqFullFormRef = useRef<HTMLDivElement>(null);
+  const azVirtualRef = useRef<HTMLDivElement>(null);
+  const heroHeadingRef = useRef<HTMLHeadingElement>(null);
+  const heroTextRef = useRef<HTMLParagraphElement>(null);
+  const heroButtonsRef = useRef<HTMLDivElement>(null);
+  const heroImageRef = useRef<HTMLDivElement>(null);
+  const featureCardsRef = useRef<HTMLDivElement>(null);
+  const rewardsContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // GSAP letter animation for "IETQ" and "EMPOWERING TOMORROW'S LEADERS"
+    if (gsapHeadingRef.current) {
+      // Get each word container
+      const wordContainers = gsapHeadingRef.current.querySelectorAll('.heading-word');
+      const wordContainersArray = Array.from(wordContainers);
+      
+      // Set initial state for each container
+      gsap.set(wordContainersArray, {
+        y: 60,
+        opacity: 0
+      });
+      
+      // Create a master timeline for the heading animation
+      const masterTl = gsap.timeline();
+      
+      // First, special animation for IETQ title
+      const ietqContainer = wordContainersArray[0];
+      const ietqLetters = ietqContainer.querySelectorAll('span');
+      const ietqLettersArray = Array.from(ietqLetters);
+      
+      // Set initial state for IETQ letters
+      gsap.set(ietqLettersArray, {
+        scale: 0,
+        opacity: 0,
+        rotationY: -180,
+      });
+      
+      // IETQ Timeline
+      const ietqTl = gsap.timeline();
+      
+      // Animate the IETQ container first
+      ietqTl.to(ietqContainer, {
+        y: 0,
+        opacity: 1,
+        duration: 0.6,
+        ease: "back.out(1.7)"
+      });
+      
+      // Then give IETQ letters a dramatic 3D flip-in animation
+      ietqTl.to(ietqLettersArray, {
+        scale: 1.2,
+        opacity: 1,
+        rotationY: 0,
+        stagger: 0.15,
+        duration: 0.7,
+        ease: "back.out(2)",
+        transformOrigin: "center center"
+      });
+      
+      // Scale back to normal size with a slight bounce
+      ietqTl.to(ietqLettersArray, {
+        scale: 1,
+        duration: 0.5,
+        ease: "elastic.out(1.2, 0.5)"
+      }, "-=0.2");
+      
+      // Add some shine effect to the gold letters
+      ietqTl.to(ietqContainer, {
+        backgroundPosition: "200%",
+        duration: 1.5,
+        ease: "sine.inOut"
+      }, "-=0.3");
+      
+      // Animate the full form text if it exists
+      if (ietqFullFormRef.current) {
+        gsap.set(ietqFullFormRef.current, {
+          opacity: 0,
+          y: 10
+        });
+        
+        ietqTl.to(ietqFullFormRef.current, {
+          opacity: 1,
+          y: 0,
+          duration: 0.7,
+          delay: 0.2,
+          ease: "power2.out"
+        });
+      }
+      
+      // Add the IETQ animation to master timeline
+      masterTl.add(ietqTl);
+      
+      // Then handle the rest of the words (starting from second word)
+      for (let i = 1; i < wordContainersArray.length; i++) {
+        const container = wordContainersArray[i];
+        const letters = container.querySelectorAll('span');
+        const lettersArray = Array.from(letters);
+        
+        // Set initial state for letters in this line
+        gsap.set(lettersArray, {
+          y: -40,
+          opacity: 0,
+          rotateX: -90
+        });
+        
+        // Create a timeline for this word
+        const wordTl = gsap.timeline();
+        
+        // First, animate in the container
+        wordTl.to(container, {
+          y: 0,
+          opacity: 1,
+          duration: 0.5,
+          ease: "power2.out"
+        });
+        
+        // Then animate each letter with elastic motion
+        wordTl.to(lettersArray, {
+          y: 0,
+          opacity: 1,
+          rotateX: 0,
+          stagger: 0.08,
+          duration: 0.8,
+          ease: "elastic.out(1, 0.3)"
+        }, "-=0.3");
+        
+        // Add this word's timeline to the master timeline with a delay
+        masterTl.add(wordTl, "-=0.3");
+      }
+      
+      // After all animations, add continuous effects
+      masterTl.add(() => {
+        // Add a pulsing glow to IETQ
+        gsap.to(ietqContainer, {
+          textShadow: "0 0 15px rgba(255,215,0,0.8), 0 0 20px rgba(255,215,0,0.4)",
+          duration: 1.5,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut"
+        });
+        
+        // Select all non-IETQ letter spans (for the rest of the heading)
+        const nonIetqLetters = [];
+        for (let i = 1; i < wordContainersArray.length; i++) {
+          nonIetqLetters.push(...Array.from(wordContainersArray[i].querySelectorAll('span')));
+        }
+        
+        // Animate with a gentle floating motion
+        gsap.to(nonIetqLetters, {
+          y: "-=5",
+          duration: 1.5,
+          stagger: {
+            each: 0.05,
+            from: "random",
+            grid: "auto"
+          },
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut"
+        });
+      });
+    }
+
+    // GSAP animation for A-Z Virtual proudly presents
+    if (azVirtualRef.current) {
+      gsap.fromTo(azVirtualRef.current,
+        { opacity: 0, scale: 0.8, y: 20 },
+        { 
+          opacity: 1, 
+          scale: 1, 
+          y: 0, 
+          duration: 1,
+          delay: 1.5, 
+          ease: "back.out(1.7)",
+          onComplete: () => {
+            // Add a gentle bounce effect after appearing
+            gsap.to(azVirtualRef.current, {
+              y: -5,
+              duration: 1.2,
+              repeat: -1,
+              yoyo: true,
+              ease: "sine.inOut"
+            });
+          }
+        }
+      );
+    }
+
+    // Hero section animation
+    if (heroHeadingRef.current) {
+      gsap.from(heroHeadingRef.current, {
+        opacity: 0,
+        y: 30,
+        duration: 0.8,
+        ease: "power3.out"
+      });
+    }
+
+    if (heroTextRef.current) {
+      gsap.from(heroTextRef.current, {
+        opacity: 0,
+        y: 30,
+        duration: 0.8,
+        delay: 0.2,
+        ease: "power3.out"
+      });
+    }
+
+    if (heroButtonsRef.current) {
+      gsap.from(heroButtonsRef.current, {
+        opacity: 0,
+        y: 30,
+        duration: 0.8,
+        delay: 0.4,
+        ease: "power3.out"
+      });
+    }
+
+    if (heroImageRef.current) {
+      gsap.from(heroImageRef.current, {
+        opacity: 0,
+        x: 50,
+        duration: 1,
+        delay: 0.3,
+        ease: "power3.out"
+      });
+    }
+
+    // Continuous circular animation for competition stages
+    const competitionObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          // First animate the line (permanently visible)
+          const line = document.querySelector('.competition-line');
+          if (line) {
+            gsap.fromTo(line, 
+              { height: 0, opacity: 0 }, 
+              { height: "100%", opacity: 1, duration: 1, ease: "power2.inOut" }
+            );
+          }
+          
+          // Get all three competition stages
+          const stage1 = document.querySelector('.competition-stage-1');
+          const stage2 = document.querySelector('.competition-stage-2');
+          const stage3 = document.querySelector('.competition-stage-3');
+          
+          if (stage1 && stage2 && stage3) {
+            // Show all stages initially
+            gsap.set([stage1, stage2, stage3], { opacity: 1, x: 0, scale: 1 });
+            
+            // Create a continuous timeline that repeats
+            const tl = gsap.timeline({ 
+              repeat: -1, // Infinite repeat
+              repeatDelay: 0.5
+            });
+            
+            // Stage 1 focus animation
+            tl.to(stage1, { 
+              scale: 1.05, 
+              filter: "brightness(1.1)",
+              boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
+              duration: 0.7, 
+              ease: "back.out(1.7)" 
+            })
+            .to(stage1, { 
+              scale: 1, 
+              filter: "brightness(1)",
+              boxShadow: "none",
+              duration: 0.7, 
+              ease: "back.out(1.2)" 
+            }, "+=1.5") // Hold for 1.5s
+            
+            // Stage 2 focus animation
+            .to(stage2, { 
+              scale: 1.05, 
+              filter: "brightness(1.1)",
+              boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
+              duration: 0.7, 
+              ease: "back.out(1.7)" 
+            }, "+=0.3")
+            .to(stage2, { 
+              scale: 1, 
+              filter: "brightness(1)",
+              boxShadow: "none",
+              duration: 0.7, 
+              ease: "back.out(1.2)" 
+            }, "+=1.5") // Hold for 1.5s
+            
+            // Stage 3 focus animation
+            .to(stage3, { 
+              scale: 1.05, 
+              filter: "brightness(1.1)",
+              boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
+              duration: 0.7, 
+              ease: "back.out(1.7)" 
+            }, "+=0.3")
+            .to(stage3, { 
+              scale: 1, 
+              filter: "brightness(1)",
+              boxShadow: "none",
+              duration: 0.7, 
+              ease: "back.out(1.2)" 
+            }, "+=1.5"); // Hold for 1.5s
+          }
+          
+          // Only observe once
+          competitionObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.3 });
+    
+    // Start observing the competition container
+    const competitionContainer = document.querySelector('.competition-container');
+    if (competitionContainer) {
+      competitionObserver.observe(competitionContainer);
+    }
+      
+    // Features animation (cards)
+    if (featureCardsRef.current) {
+      const cards = featureCardsRef.current.querySelectorAll('.stat-card');
+      gsap.from(cards, {
+        opacity: 0,
+        y: 30,
+        duration: 0.6,
+        stagger: 0.15,
+        ease: "back.out(1.2)",
+        delay: 0.6
+      });
+    }
+
+    // Add rewards left-to-right animation
+    const rewardsObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          // Animate rewards cards from left to right
+          const rewardCards = entry.target.querySelectorAll('.reward-card');
+          rewardCards.forEach(card => {
+            card.classList.add('animated');
+          });
+          
+          // Only observe once
+          rewardsObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.2 });
+    
+    // Start observing the rewards container
+    if (rewardsContainerRef.current) {
+      rewardsObserver.observe(rewardsContainerRef.current);
+    }
+
+    // Add intersection observer for section animations
+    const sections = document.querySelectorAll('section:not(:first-child)');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          // Animate the section
+          gsap.from(entry.target.querySelector('h2'), {
+            opacity: 0,
+            y: 20,
+            duration: 0.7,
+            ease: "power2.out"
+          });
+          
+          gsap.from(entry.target.querySelector('p'), {
+            opacity: 0,
+            y: 20,
+            duration: 0.7,
+            delay: 0.1,
+            ease: "power2.out"
+          });
+        }
+      });
+    }, { threshold: 0.2 });
+
+    sections.forEach(section => {
+      observer.observe(section);
+    });
+
+    return () => {
+      // Clean up all observers
+      observer.disconnect();
+      competitionObserver.disconnect();
+      rewardsObserver.disconnect();
+    };
+  }, []);
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
+      
+      {/* Hero Section with Parallax */}
+      <section className="parallax-container relative text-white py-6 md:py-12 overflow-hidden">
+        {/* Parallax background elements */}
+        <div className="parallax-layer parallax-layer-back bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900"></div>
+        
+        {/* Animated background shapes */}
+        <div className="parallax-shape shape-1" style={{ background: "radial-gradient(circle, rgba(255,215,0,0.15) 0%, rgba(255,215,0,0) 70%)" }}></div>
+        <div className="parallax-shape shape-2" style={{ background: "radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%)" }}></div>
+        
+        <div className="content-wrapper relative z-10">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col lg:grid lg:grid-cols-2 lg:gap-8 items-center">
+              <div className="mb-10 lg:mb-0 parallax-content parallax-fastest">
+                {/* Animated headline with students lifting the title */}
+                <div className="mb-6 overflow-hidden relative">
+                  <div className="relative z-10">
+                    <div className="bg-gradient-to-r from-purple-500 via-accent to-pink-500 text-transparent bg-clip-text mx-auto relative">
+                      <h1 ref={gsapHeadingRef} className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-wider text-center font-education drop-shadow-lg flex flex-col items-center leading-tight">
+                        <div className="overflow-hidden mb-8">
+                          <div className="flex flex-col items-center">
+                            <div className="heading-word text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-widest font-rubik" style={{ color: "#ffd700", textShadow: "0 0 15px rgba(255,215,0,0.7), 0 0 30px rgba(255,215,0,0.4)" }}>
+                              <span className="inline-block">I</span>
+                              <span className="inline-block">E</span>
+                              <span className="inline-block">T</span>
+                              <span className="inline-block">Q</span>
+                            </div>
+                            <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-white/95 mt-3 font-medium tracking-wider font-rubik" ref={ietqFullFormRef} style={{ color: "#f5f5f5", textShadow: "0 0 12px rgba(255,255,255,0.6)" }}>
+                              India's Emerging Talent Quest
+                            </div>
+                          </div>
+                        </div>
+                        <div className="overflow-hidden mt-2">
+                          <div className="heading-word">
+                            <span className="inline-block">E</span>
+                            <span className="inline-block">M</span>
+                            <span className="inline-block">P</span>
+                            <span className="inline-block">O</span>
+                            <span className="inline-block">W</span>
+                            <span className="inline-block">E</span>
+                            <span className="inline-block">R</span>
+                            <span className="inline-block">I</span>
+                            <span className="inline-block">N</span>
+                            <span className="inline-block">G</span>
+                          </div>
+                        </div>
+                        <div className="overflow-hidden">
+                          <div className="heading-word mt-1">
+                            <span className="inline-block">T</span>
+                            <span className="inline-block">O</span>
+                            <span className="inline-block">M</span>
+                            <span className="inline-block">O</span>
+                            <span className="inline-block">R</span>
+                            <span className="inline-block">R</span>
+                            <span className="inline-block">O</span>
+                            <span className="inline-block">W</span>
+                            <span className="inline-block">'</span>
+                            <span className="inline-block">S</span>
+                          </div>
+                        </div>
+                        <div className="overflow-hidden">
+                          <div className="heading-word mt-1">
+                            <span className="inline-block">L</span>
+                            <span className="inline-block">E</span>
+                            <span className="inline-block">A</span>
+                            <span className="inline-block">D</span>
+                            <span className="inline-block">E</span>
+                            <span className="inline-block">R</span>
+                            <span className="inline-block">S</span>
+                          </div>
+                        </div>
+                      </h1>
+                    </div>
+                  </div>
+                  
+                  {/* A-Z Virtual proudly presents */}
+                  <div className="mt-8 text-center">
+                    <div ref={azVirtualRef} className="inline-block bg-gradient-to-r from-purple-800/80 to-blue-800/80 backdrop-blur-md py-3 px-8 rounded-full shadow-xl border border-white/20 opacity-0">
+                      <div className="flex items-center justify-center space-x-3">
+                        <span className="text-xl font-bold text-white font-education tracking-wide">A-Z Virtual</span>
+                        <span className="text-base font-semibold text-accent italic font-serif">proudly presents</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <h1 ref={heroHeadingRef} className="hero-heading text-4xl font-bold sm:text-5xl lg:text-6xl font-education">
+                  <span className="block">"Discover. Develop. Dazzle."</span>
+                </h1>
+                <h2 className="text-2xl md:text-3xl font-bold mt-2 text-accent">
+                  Get Ready for the Ultimate Student Showdown – IETQ is Here!
+                </h2>
+                <p className="text-xl font-bold mt-4 text-white">
+                  GO BEYOND YOUR CLASSROOM
+                </p>
+                <p ref={heroTextRef} className="hero-text mt-4 text-base md:text-lg">
+                  Calling all curious thinkers, bold creators, and hidden superstars! IETQ (India's Emerging Talent Quest) is your all-India stage to compete, collaborate, and celebrate your unique talents.
+                </p>
+                <div className="bg-accent/90 backdrop-blur-sm p-4 rounded-lg border-l-4 border-white mt-4 mb-6 transform rotate-1 shadow-lg">
+                  <p className="text-xl font-bold text-primary-950 text-center">
+                    Are you ready to rise? Join the Quest. Be the Next Talent Icon!
+                  </p>
+                </div>
+                <div ref={heroButtonsRef} className="hero-buttons mt-4 flex flex-wrap gap-4">
+                  <Link href="/register">
+                    <Button 
+                      size="lg" 
+                      className="bg-accent text-primary-950 hover:bg-accent/90 font-bold text-base px-6 py-6 h-auto shadow-lg animate-pulse"
+                    >
+                      Register Now 🚀
+                    </Button>
+                  </Link>
+                  <Button 
+                    size="lg" 
+                    className="bg-blue-600 border-blue-500 text-white hover:bg-blue-700 font-medium text-base px-6 py-6 h-auto shadow-md"
+                    onClick={() => {
+                      const elementToScrollTo = document.getElementById('know-more');
+                      if (elementToScrollTo) {
+                        elementToScrollTo.scrollIntoView({ behavior: 'smooth' });
+                      }
+                    }}
+                  >
+                    Know More ↓
+                  </Button>
+                </div>
+                
+                <div className="mt-8 inline-block bg-accent/90 text-primary-950 px-6 py-3 rounded-full shadow-md">
+                  <h3 className="font-bold text-lg mb-0">Nationwide Platform</h3>
+                  <p className="text-xl font-black mb-0">Grades 1-10</p>
+                </div>
+              </div>
+              <div className="w-full lg:flex lg:justify-end">
+                <div ref={heroImageRef} className="hero-image rounded-xl overflow-hidden shadow-xl bg-white/10 backdrop-blur-sm p-4 md:p-6 w-full parallax-content parallax-slow">
+                  <div className="text-center mb-4">
+                    <h3 className="text-xl md:text-2xl font-bold">Unlock Your Potential</h3>
+                    <p className="mt-2 text-white/80">Showcase talents, develop skills, and rise as future-ready leaders!</p>
+                  </div>
+                  <div className="bg-white/30 p-4 rounded-lg backdrop-blur-sm shadow-lg competition-container relative z-20">
+                    <h4 className="font-bold text-xl mb-4 text-center">Competition</h4>
+                    <div className="relative">
+                      {/* Vertical timeline/competition path */}
+                      <div className="absolute left-14 sm:left-[120px] top-0 bottom-0 w-1 bg-accent/80 competition-line"></div>
+                      
+                      {/* Competition stages - mobile-friendly card style */}
+                      <div className="relative z-30 flex flex-col space-y-8 transform scale-95">
+                        {/* Quizz Whizz */}
+                        <div className="flex competition-stage competition-stage-1">
+                          <div className="flex-shrink-0">
+                            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-accent text-primary-900 text-xl font-bold border-4 border-white shadow-lg animate-pulse">
+                              QW
+                            </div>
+                          </div>
+                          <div className="ml-4 bg-white p-4 rounded-lg shadow-lg border-l-4 border-accent flex-1">
+                            <h4 className="text-lg font-bold">Quizz Whizz</h4>
+                            <p className="text-gray-600 mt-1">Knowledge-based assessment across multiple subjects</p>
+                            <div className="mt-2 flex items-center text-accent font-medium text-sm">
+                              <svg className="h-4 w-4 mr-1 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                              </svg>
+                              Start your journey here
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Think Tank */}
+                        <div className="flex competition-stage competition-stage-2">
+                          <div className="flex-shrink-0">
+                            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-blue-600 to-cyan-400 text-white text-xl font-bold border-4 border-white shadow-lg animate-pulse">
+                              TT
+                            </div>
+                          </div>
+                          <div className="ml-4 bg-white p-4 rounded-lg shadow-lg border-l-4 border-blue-500 flex-1">
+                            <h4 className="text-lg font-bold text-blue-700">Think Tank Challenge</h4>
+                            <p className="text-gray-600 mt-1">Problem-solving and creative thinking challenges</p>
+                            <div className="mt-2 flex items-center text-blue-600 font-medium text-sm">
+                              <svg className="h-4 w-4 mr-1 animate-spin-slow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                              </svg>
+                              Develop your critical skills
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Me@My Best */}
+                        <div className="flex competition-stage competition-stage-3">
+                          <div className="flex-shrink-0">
+                            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-purple-600 to-pink-500 text-white text-xl font-bold border-4 border-white shadow-lg animate-pulse">
+                              MB
+                            </div>
+                          </div>
+                          <div className="ml-4 bg-white p-4 rounded-lg shadow-lg border-l-4 border-purple-500 flex-1">
+                            <h4 className="text-lg font-bold text-purple-700">Me@My Best</h4>
+                            <p className="text-gray-600 mt-1">Talent showcase and final presentation stage</p>
+                            <div className="mt-2 flex items-center text-purple-600 font-medium text-sm">
+                              <svg className="h-4 w-4 mr-1 animate-ping" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                              </svg>
+                              Shine in your element
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-4 bg-white/20 rounded-lg p-3 flex items-center shadow-lg relative z-40">
+                  <div className="mr-2">
+                    <div className="h-4 w-4 bg-red-500 rounded-full animate-pulse"></div>
+                  </div>
+                  <p className="text-sm font-medium">Registration closes in: <span className="font-bold">30 days</span></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Vision & Objective Section */}
+      <section id="know-more" className="py-16 text-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-800 via-indigo-900 to-blue-950"></div>
+        <div className="absolute inset-0" style={{ 
+          backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%232463EB' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E\")" 
+        }}></div>
+        <div className="relative z-10">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="lg:grid lg:grid-cols-2 lg:gap-12 items-start">
+              <div>
+                <h2 className="text-3xl font-bold font-education text-white mb-6">
+                  Our Vision
+                </h2>
+                <div className="prose prose-lg max-w-none prose-invert">
+                  <p className="text-white/90">
+                    We aim to nurture every child's hidden potential and prepare them for a confident, capable, and creative future. IETQ helps children shine beyond textbooks through fun, skill-based learning and recognition.
+                  </p>
+                  <h3 className="text-2xl font-bold mt-8 mb-4 text-white">Objective</h3>
+                  <p className="text-white/90">
+                    We strive to create learning experiences that build collaboration, critical thinking, and communication skills, to support academic goals while encouraging self-expression and holistic development.
+                  </p>
+                </div>
+              </div>
+              
+              <div className="mt-10 lg:mt-0">
+                <h2 className="text-3xl font-bold font-education text-white mb-6">
+                  What You'll Get
+                </h2>
+                
+                <div ref={featureCardsRef} className="space-y-6">
+                  <div className="bg-indigo-700/20 backdrop-blur-sm p-6 rounded-xl border border-indigo-500/30 shadow-xl">
+                    <div className="learning-card-scene">
+                      <div className="learning-card-container">
+                        <div className="learning-card">
+                          <div className="learning-card-icon">👨‍👩‍👧‍👦</div>
+                          <div className="learning-card-content">
+                            <h3>Live Expert Webinars</h3>
+                            <p>Engage in interactive sessions led by industry professionals and education experts.</p>
+                          </div>
+                        </div>
+                        
+                        <div className="learning-card">
+                          <div className="learning-card-icon">🎬</div>
+                          <div className="learning-card-content">
+                            <h3>On-Demand Learning</h3>
+                            <p>Access pre-recorded video lessons to learn at your own pace, anytime, anywhere.</p>
+                          </div>
+                        </div>
+                        
+                        <div className="learning-card">
+                          <div className="learning-card-icon">📚</div>
+                          <div className="learning-card-content">
+                            <h3>Curated E-Learning Material</h3>
+                            <p>Get high-quality digital study content tailored to each round of the competition.</p>
+                          </div>
+                        </div>
+                        
+                        <div className="learning-card">
+                          <div className="learning-card-icon">🏆</div>
+                          <div className="learning-card-content">
+                            <h3>Competition Preparation</h3>
+                            <p>Special modules designed to help you succeed in our competitions and challenges.</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Prizes Section with Parallax */}
+      <section className="parallax-section relative py-16 overflow-hidden">
+        {/* Parallax background */}
+        <div className="parallax-layer parallax-layer-back bg-gradient-to-r from-amber-700 to-amber-900"></div>
+        
+        {/* Parallax bubbles */}
+        <div className="prizes-parallax-bubbles">
+          <div className="parallax-bubble bubble-1"></div>
+          <div className="parallax-bubble bubble-2"></div>
+          <div className="parallax-bubble bubble-3"></div>
+        </div>
+        
+        <div className="content-wrapper relative z-10">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12 parallax-content parallax-fastest">
+              <div className="inline-block bg-white text-amber-700 font-bold px-6 py-2 rounded-full mb-6 transform -rotate-2 animate-pulse">
+                Exciting Rewards!
+              </div>
+              <h2 className="text-4xl font-bold font-education text-white">
+                Get ready to be rewarded for your talent!
+              </h2>
+              <p className="mt-4 max-w-3xl mx-auto text-xl text-white/90">
+                IETQ offers 1000+ exciting prizes across categories — because every unique skill deserves to shine!
+              </p>
+            </div>
+            
+            {/* Ticker for Rewards Headline */}
+            <div className="rewards-ticker-container ticker-container my-16 parallax-content">
+              <div className="rewards-ticker ticker">
+                {/* First instance of items */}
+                <div className="ticker-item">
+                  <span className="text-3xl mr-3 animate-tada">🏅</span>
+                  <span>Trophies & Medals</span>
+                </div>
+                <div className="ticker-item">
+                  <span className="text-3xl mr-3 animate-float">✨</span>
+                  <span>Participation Certificates</span>
+                </div>
+                <div className="ticker-item">
+                  <span className="text-3xl mr-3 animate-heartbeat">💰</span>
+                  <span>Cash Prizes & Scholarships</span>
+                </div>
+                
+                {/* Duplicate items for seamless looping */}
+                <div className="ticker-item">
+                  <span className="text-3xl mr-3 animate-tada">🏅</span>
+                  <span>Trophies & Medals</span>
+                </div>
+                <div className="ticker-item">
+                  <span className="text-3xl mr-3 animate-float">✨</span>
+                  <span>Participation Certificates</span>
+                </div>
+                <div className="ticker-item">
+                  <span className="text-3xl mr-3 animate-heartbeat">💰</span>
+                  <span>Cash Prizes & Scholarships</span>
+                </div>
+              </div>
+            </div>
+            
+            {/* Static Reward Cards */}
+            <div id="rewards-container" ref={rewardsContainerRef} className="grid md:grid-cols-3 gap-6 mt-16 parallax-content parallax-slow relative z-10">
+              <div className="reward-card bg-white/15 backdrop-blur-sm rounded-xl p-4 text-center shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 transform scale-90">
+                <div className="inline-block text-4xl mb-3 animate-tada">🏅</div>
+                <h3 className="text-lg font-bold text-white">Trophies & Medals</h3>
+                <p className="mt-2 text-white/90 text-sm">
+                  Showcase your achievements with prestigious awards to display proudly
+                </p>
+              </div>
+              
+              <div className="reward-card bg-white/15 backdrop-blur-sm rounded-xl p-4 text-center shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 transform scale-90">
+                <div className="inline-block text-4xl mb-3 animate-float">✨</div>
+                <h3 className="text-lg font-bold text-white">Participation Certificates</h3>
+                <p className="mt-2 text-white/90 text-sm">
+                  Every student receives recognition for their efforts and participation
+                </p>
+              </div>
+              
+              <div className="reward-card bg-white/15 backdrop-blur-sm rounded-xl p-4 text-center shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 transform scale-90">
+                <div className="inline-block text-4xl mb-3 animate-heartbeat">💰</div>
+                <h3 className="text-lg font-bold text-white">Cash Prizes & Scholarships</h3>
+                <p className="mt-2 text-white/90 text-sm">
+                  Valuable rewards to support your educational journey and future goals
+                </p>
+              </div>
+            </div>
+            
+            <div className="text-center mt-16 parallax-content parallax-fastest">
+              <h3 className="text-2xl font-bold text-white">Step up. Stand out. Shine across India!</h3>
+              <p className="mt-2 mb-8 text-lg text-white/90">
+                Top performers will be featured nationwide, earning the recognition they truly deserve!
+              </p>
+              <Button 
+                size="lg" 
+                className="bg-white text-amber-700 hover:bg-white/90 font-bold px-8 py-6 h-auto shadow-lg"
+                onClick={() => window.location.href = '/register'}
+              >
+                Register Now 🚀
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      {/* Jury Section */}
+      <section className="py-16 bg-purple-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="lg:grid lg:grid-cols-12 lg:gap-8 items-center">
+            <div className="lg:col-span-7">
+              <h2 className="text-3xl font-bold font-education text-gray-900 mb-6">
+                Expert Panel & Judges
+              </h2>
+              <p className="text-lg text-gray-600 mb-6">
+                Our esteemed panel includes 500+ judges and subject matter experts from diverse fields such as education, arts, STEM, design, and public speaking.
+              </p>
+              <p className="text-lg text-gray-600">
+                Each competitive stage is evaluated by specialists to ensure fair, transparent, and skill-based judgment, giving every participant the recognition they truly deserve.
+              </p>
+              
+              <div className="mt-8 grid grid-cols-3 gap-4 text-center">
+                <div className="bg-gradient-to-b from-primary-50 to-primary-100 rounded-lg p-3 shadow-md transition-all duration-300 hover:shadow-lg hover:scale-105">
+                  <div className="animate-float text-2xl mb-2">👨‍🏫</div>
+                  <h4 className="font-semibold text-primary-700">Education Experts</h4>
+                  <p className="text-sm text-gray-600 mt-1">200+ specialists</p>
+                </div>
+                <div className="bg-gradient-to-b from-secondary-50 to-secondary-100 rounded-lg p-3 shadow-md transition-all duration-300 hover:shadow-lg hover:scale-105">
+                  <div className="animate-jello text-2xl mb-2">👩‍🔬</div>
+                  <h4 className="font-semibold text-secondary-700">STEM Professionals</h4>
+                  <p className="text-sm text-gray-600 mt-1">150+ specialists</p>
+                </div>
+                <div className="bg-gradient-to-b from-amber-50 to-amber-100 rounded-lg p-3 shadow-md transition-all duration-300 hover:shadow-lg hover:scale-105">
+                  <div className="animate-tada text-2xl mb-2">👨‍🎨</div>
+                  <h4 className="font-semibold text-amber-700">Arts & Design</h4>
+                  <p className="text-sm text-gray-600 mt-1">150+ specialists</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="lg:col-span-5 mt-10 lg:mt-0">
+              <div className="relative rounded-2xl overflow-hidden shadow-xl bg-white p-6">
+                <h3 className="text-xl font-bold text-purple-900 mb-4">Expert Evaluation Process</h3>
+                <p className="mb-4 text-gray-600">Our panel of experts evaluates all entries based on standard criteria to ensure fairness and transparency.</p>
+                <ul className="space-y-3">
+                  <li className="flex items-start">
+                    <svg className="h-5 w-5 text-purple-600 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-gray-700">Scientific rubric-based scoring system</span>
+                  </li>
+                  <li className="flex items-start">
+                    <svg className="h-5 w-5 text-purple-600 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-gray-700">Multiple rounds of evaluation</span>
+                  </li>
+                  <li className="flex items-start">
+                    <svg className="h-5 w-5 text-purple-600 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-gray-700">Detailed feedback for improvement</span>
+                  </li>
+                  <li className="flex items-start">
+                    <svg className="h-5 w-5 text-purple-600 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-gray-700">Age-appropriate assessment standards</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      {/* Mission Statement Section */}
+      <section className="py-16 bg-gradient-to-r from-indigo-50 to-blue-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10">
+            <div className="inline-block bg-indigo-100 text-indigo-800 font-bold px-6 py-2 rounded-full mb-6 transform -rotate-1 animate-pulse">
+              Our Mission
+            </div>
+            <h2 className="text-3xl font-bold font-education text-gray-900 mb-6">
+              IETQ Mission Statement
+            </h2>
+            <p className="mt-4 max-w-3xl mx-auto text-xl text-gray-600 leading-relaxed">
+              India's Emerging Talent Quest (IETQ) is a nationwide virtual platform for
+              Grades 1 to 10, unlocking core skills, collaboration, and hidden talents.
+              IETQ shapes future-ready leaders by fostering creativity, critical thinking,
+              digital fluency, and life skills. With dynamic challenges and expert feedback,
+              we empower students for success in the 21st century and beyond.
+            </p>
+          </div>
+          
+          <div className="mt-12 grid md:grid-cols-4 gap-4">
+            <div className="bg-white rounded-xl p-4 shadow-md hover:shadow-lg transition-all duration-300 border-l-4 border-primary-500">
+              <div className="flex items-center mb-2">
+                <div className="text-2xl mr-2 animate-float">🌍</div>
+                <h3 className="text-md font-bold text-gray-900">Pan-India Reach</h3>
+              </div>
+              <p className="text-sm text-gray-600">
+                Connecting talented students from across the entire nation
+              </p>
+            </div>
+            
+            <div className="bg-white rounded-xl p-4 shadow-md hover:shadow-lg transition-all duration-300 border-l-4 border-blue-500">
+              <div className="flex items-center mb-2">
+                <div className="text-2xl mr-2 animate-float">📚</div>
+                <h3 className="text-md font-bold text-gray-900">Open to Grades 1-10</h3>
+              </div>
+              <p className="text-sm text-gray-600">
+                Inclusive platform for students of all school grades
+              </p>
+            </div>
+            
+            <div className="bg-white rounded-xl p-4 shadow-md hover:shadow-lg transition-all duration-300 border-l-4 border-secondary-500">
+              <div className="flex items-center mb-2">
+                <div className="text-2xl mr-2 animate-tada">🏅</div>
+                <h3 className="text-md font-bold text-gray-900">National Recognition</h3>
+              </div>
+              <p className="text-sm text-gray-600">
+                Earn prestigious recognition and stand out on a national platform
+              </p>
+            </div>
+            
+            <div className="bg-white rounded-xl p-4 shadow-md hover:shadow-lg transition-all duration-300 border-l-4 border-purple-500">
+              <div className="flex items-center mb-2">
+                <div className="text-2xl mr-2 animate-pulse">✍</div>
+                <h3 className="text-md font-bold text-gray-900">Expert Feedback</h3>
+              </div>
+              <p className="text-sm text-gray-600">
+                Personalized feedback to help you improve and excel
+              </p>
+            </div>
+            
+            <div className="bg-white rounded-xl p-4 shadow-md hover:shadow-lg transition-all duration-300 border-l-4 border-accent">
+              <div className="flex items-center mb-2">
+                <div className="text-2xl mr-2 animate-heartbeat">🎉</div>
+                <h3 className="text-md font-bold text-gray-900">100,000+ Participants</h3>
+              </div>
+              <p className="text-sm text-gray-600">
+                Join a vibrant community of aspiring young talents across India
+              </p>
+            </div>
+            
+            <div className="bg-white rounded-xl p-4 shadow-md hover:shadow-lg transition-all duration-300 border-l-4 border-amber-500">
+              <div className="flex items-center mb-2">
+                <div className="text-2xl mr-2 animate-bounce">🧳</div>
+                <h3 className="text-md font-bold text-gray-900">Flexible Participation</h3>
+              </div>
+              <p className="text-sm text-gray-600">
+                Participate at your own pace and according to your schedule
+              </p>
+            </div>
+            
+            <div className="bg-white rounded-xl p-4 shadow-md hover:shadow-lg transition-all duration-300 border-l-4 border-emerald-500">
+              <div className="flex items-center mb-2">
+                <div className="text-2xl mr-2 animate-pulse">🧩</div>
+                <h3 className="text-md font-bold text-gray-900">21st-Century Skills</h3>
+              </div>
+              <p className="text-sm text-gray-600">
+                Develop critical skills needed for future success
+              </p>
+            </div>
+            
+            <div className="bg-white rounded-xl p-4 shadow-md hover:shadow-lg transition-all duration-300 border-l-4 border-rose-500">
+              <div className="flex items-center mb-2">
+                <div className="text-2xl mr-2 animate-tada">🚀</div>
+                <h3 className="text-md font-bold text-gray-900">Future-Ready Focus</h3>
+              </div>
+              <p className="text-sm text-gray-600">
+                Prepare for future challenges with future-focused learning
+              </p>
+            </div>
+          </div>
+          
+          <div className="mt-10 bg-indigo-100 rounded-xl p-6 shadow-md">
+            <h3 className="text-xl font-bold text-center text-indigo-900 mb-4">
+              21st-Century Skills Development
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+              <div className="bg-white p-2 rounded-lg shadow-sm text-center">
+                <span className="text-indigo-700 font-medium">|| Critical Thinking & Problem-Solving ||</span>
+              </div>
+              <div className="bg-white p-2 rounded-lg shadow-sm text-center">
+                <span className="text-indigo-700 font-medium">|| Communication & Presentation ||</span>
+              </div>
+              <div className="bg-white p-2 rounded-lg shadow-sm text-center">
+                <span className="text-indigo-700 font-medium">|| Leadership and Teamwork ||</span>
+              </div>
+              <div className="bg-white p-2 rounded-lg shadow-sm text-center">
+                <span className="text-indigo-700 font-medium">|| Creativity and Innovation ||</span>
+              </div>
+              <div className="bg-white p-2 rounded-lg shadow-sm text-center">
+                <span className="text-indigo-700 font-medium">|| Digital Proficiency & Tech Savvy ||</span>
+              </div>
+              <div className="bg-white p-2 rounded-lg shadow-sm text-center">
+                <span className="text-indigo-700 font-medium">|| Emotional Intelligence ||</span>
+              </div>
+              <div className="bg-white p-2 rounded-lg shadow-sm text-center">
+                <span className="text-indigo-700 font-medium">|| Entrepreneurial Thinking ||</span>
+              </div>
+              <div className="bg-white p-2 rounded-lg shadow-sm text-center">
+                <span className="text-indigo-700 font-medium">|| Adaptability & Decision-Making ||</span>
+              </div>
+              <div className="bg-white p-2 rounded-lg shadow-sm text-center">
+                <span className="text-indigo-700 font-medium">|| Cognitive Mastery ||</span>
+              </div>
+              <div className="bg-white p-2 rounded-lg shadow-sm text-center">
+                <span className="text-indigo-700 font-medium">|| Public Speaking ||</span>
+              </div>
+              <div className="bg-white p-2 rounded-lg shadow-sm text-center">
+                <span className="text-indigo-700 font-medium">|| Research Skills (Reports) ||</span>
+              </div>
+              <div className="bg-white p-2 rounded-lg shadow-sm text-center">
+                <span className="text-indigo-700 font-medium">|| Writing Craft (Stories, Essays) ||</span>
+              </div>
+              <div className="bg-white p-2 rounded-lg shadow-sm text-center">
+                <span className="text-indigo-700 font-medium">|| Artistic Flair (Posters, Designs) ||</span>
+              </div>
+              <div className="bg-white p-2 rounded-lg shadow-sm text-center">
+                <span className="text-indigo-700 font-medium">|| Analytical Skills (Patterns, Puzzles) ||</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      {/* Benefits Section */}
+      <section className="py-16 bg-gradient-to-r from-emerald-50 to-teal-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold font-education text-gray-900">
+              Who Benefits from IETQ?
+            </h2>
+            <p className="mt-4 max-w-2xl mx-auto text-xl text-gray-500">
+              Our platform is designed to create value for both students and educational institutions
+            </p>
+          </div>
+          
+          <div className="grid lg:grid-cols-2 gap-12">
+            <div className="bg-gray-50 rounded-xl p-8 shadow-md hover:shadow-lg transition-all duration-300">
+              <h3 className="text-2xl font-bold text-primary-700 mb-6">IETQ: Transforming Students into Leaders</h3>
+              <div className="text-center mb-6">
+                <h4 className="text-lg font-bold text-gray-800">Key benefits of participating in IETQ</h4>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-white rounded-lg p-4 shadow-md">
+                  <div className="flex items-center mb-2">
+                    <div className="text-2xl mr-2">💫</div>
+                    <span className="text-gray-800 font-medium">Showcase Skills & Creativity</span>
+                  </div>
+                  <div className="text-right text-amber-500 font-bold">🏆🏆🏆</div>
+                </div>
+                
+                <div className="bg-white rounded-lg p-4 shadow-md">
+                  <div className="flex items-center mb-2">
+                    <div className="text-2xl mr-2">📊</div>
+                    <span className="text-gray-800 font-medium">Skill Assessment Beyond Curriculum</span>
+                  </div>
+                  <div className="text-right text-amber-500 font-bold">🥇🥇🥇</div>
+                </div>
+                
+                <div className="bg-white rounded-lg p-4 shadow-md">
+                  <div className="flex items-center mb-2">
+                    <div className="text-2xl mr-2">🏅</div>
+                    <span className="text-gray-800 font-medium">National-Level Recognition & Awards</span>
+                  </div>
+                  <div className="text-right text-amber-500 font-bold">🏆🏆🏆</div>
+                </div>
+                
+                <div className="bg-white rounded-lg p-4 shadow-md">
+                  <div className="flex items-center mb-2">
+                    <div className="text-2xl mr-2">🚀</div>
+                    <span className="text-gray-800 font-medium">Confidence and Self-Esteem Boost</span>
+                  </div>
+                  <div className="text-right text-amber-500 font-bold">🎖🎖🎖</div>
+                </div>
+                
+                <div className="bg-white rounded-lg p-4 shadow-md">
+                  <div className="flex items-center mb-2">
+                    <div className="text-2xl mr-2">📝</div>
+                    <span className="text-gray-800 font-medium">Personalized Expert Feedback</span>
+                  </div>
+                  <div className="text-right text-amber-500 font-bold">📜📜📜</div>
+                </div>
+                
+                <div className="bg-white rounded-lg p-4 shadow-md">
+                  <div className="flex items-center mb-2">
+                    <div className="text-2xl mr-2">💡</div>
+                    <span className="text-gray-800 font-medium">Critical Thinking and Innovation</span>
+                  </div>
+                  <div className="text-right text-amber-500 font-bold">🎖🎖🎖</div>
+                </div>
+                
+                <div className="bg-white rounded-lg p-4 shadow-md">
+                  <div className="flex items-center mb-2">
+                    <div className="text-2xl mr-2">💻</div>
+                    <span className="text-gray-800 font-medium">Early Exposure to Virtual Platforms</span>
+                  </div>
+                  <div className="text-right text-amber-500 font-bold">🥇🥇🥇</div>
+                </div>
+                
+                <div className="bg-white rounded-lg p-4 shadow-md">
+                  <div className="flex items-center mb-2">
+                    <div className="text-2xl mr-2">🔄</div>
+                    <span className="text-gray-800 font-medium">Self-Learning, Motivation & Discipline</span>
+                  </div>
+                  <div className="text-right text-amber-500 font-bold">🏆🏆🏆</div>
+                </div>
+              </div>
+              <div className="mt-6 bg-primary-50 p-4 rounded-lg shadow-inner">
+                <p className="text-gray-700 text-center font-medium">
+                  Peer Connection - Connect with like-minded students across India
+                </p>
+              </div>
+            </div>
+            
+            <div className="bg-gray-50 rounded-xl p-8 shadow-md hover:shadow-lg transition-all duration-300">
+              <h3 className="text-2xl font-bold text-secondary-700 mb-6">How Schools Benefit from IETQ</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-white rounded-lg p-4 shadow-md">
+                  <div className="flex items-center justify-center">
+                    <div className="text-3xl mb-2 animate-float">🎓</div>
+                  </div>
+                  <p className="text-gray-700 text-center font-medium">Build School Reputation</p>
+                </div>
+                
+                <div className="bg-white rounded-lg p-4 shadow-md">
+                  <div className="flex items-center justify-center">
+                    <div className="text-3xl mb-2 animate-pulse">🧠</div>
+                  </div>
+                  <p className="text-gray-700 text-center font-medium">Identify Talent and Interests</p>
+                </div>
+                
+                <div className="bg-white rounded-lg p-4 shadow-md">
+                  <div className="flex items-center justify-center">
+                    <div className="text-3xl mb-2 animate-tada">🎯</div>
+                  </div>
+                  <p className="text-gray-700 text-center font-medium">Boost Extracurricular Programs</p>
+                </div>
+                
+                <div className="bg-white rounded-lg p-4 shadow-md">
+                  <div className="flex items-center justify-center">
+                    <div className="text-3xl mb-2 animate-heartbeat">🏆</div>
+                  </div>
+                  <p className="text-gray-700 text-center font-medium">Gain National Recognition</p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div className="bg-white rounded-lg p-4 shadow-md">
+                  <div className="flex items-center justify-center">
+                    <div className="text-3xl mb-2 animate-jello">🚀</div>
+                  </div>
+                  <p className="text-gray-700 text-center font-medium">Drive Innovation & Growth</p>
+                </div>
+                
+                <div className="bg-white rounded-lg p-4 shadow-md">
+                  <div className="flex items-center justify-center">
+                    <div className="text-3xl mb-2 animate-float">🤝</div>
+                  </div>
+                  <p className="text-gray-700 text-center font-medium">Community Engagement</p>
+                </div>
+              </div>
+              
+              <div className="mt-8">
+                <ul className="space-y-3">
+                  <li className="flex items-start">
+                    <svg className="h-6 w-6 text-secondary-600 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-gray-700">Recognition as a Forward-Thinking Talent Hub</span>
+                  </li>
+                  <li className="flex items-start">
+                    <svg className="h-6 w-6 text-secondary-600 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-gray-700">Exclusive promotional materials and resources</span>
+                  </li>
+                  <li className="flex items-start">
+                    <svg className="h-6 w-6 text-secondary-600 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-gray-700">Enhanced visibility in educational networks</span>
+                  </li>
+                </ul>
+              </div>
+              
+              <div className="mt-8">
+                <Button 
+                  className="w-full hover:scale-105 transition-transform duration-300"
+                  onClick={() => window.location.href = '/school-partnership'}
+                >
+                  Get Your School Onboard
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      {/* Competition Format Section */}
+      <section className="py-16 bg-gradient-to-r from-violet-50 to-violet-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <div className="inline-block bg-violet-100 text-violet-800 font-bold px-6 py-2 rounded-full mb-6 transform rotate-1 animate-pulse">
+              Our Competition
+            </div>
+            <h2 className="text-3xl font-bold font-education text-gray-900">
+              The IETQ Competition Format
+            </h2>
+            <p className="mt-4 max-w-3xl mx-auto text-xl text-gray-600">
+              Thoughtfully designed to engage and challenge students across all grade levels
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-6 mt-10 transform scale-95">
+            <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden border-t-6 border-accent">
+              <div className="absolute -right-6 -top-6 w-20 h-20 bg-accent/10 rounded-full"></div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Quiz Whizz</h3>
+              <div className="text-3xl mb-4 animate-float">🧠</div>
+              <p className="text-gray-600 mb-3 text-sm">
+                Encourages analytical thinking and builds the ability to make accurate choices.
+              </p>
+              <p className="text-gray-600 text-sm">
+                Sharpens focus and accuracy while reading and interpreting.
+              </p>
+              <div className="absolute bottom-0 right-0 w-16 h-16 bg-accent/5 rounded-tl-full"></div>
+            </div>
+            
+            <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden border-t-6 border-primary-600">
+              <div className="absolute -right-6 -top-6 w-20 h-20 bg-primary-600/10 rounded-full"></div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Think-Tank Challenge</h3>
+              <div className="text-3xl mb-4 animate-heartbeat">💡</div>
+              <p className="text-gray-600 mb-3 text-sm">
+                Working effectively with peers to develop and present ideas.
+              </p>
+              <p className="text-gray-600 text-sm">
+                Investigating topics and forming meaningful conclusions.
+              </p>
+              <div className="absolute bottom-0 right-0 w-16 h-16 bg-primary-600/5 rounded-tl-full"></div>
+            </div>
+            
+            <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden border-t-6 border-secondary-600">
+              <div className="absolute -right-6 -top-6 w-20 h-20 bg-secondary-600/10 rounded-full"></div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Me@MyBest</h3>
+              <div className="text-3xl mb-4 animate-tada">✨</div>
+              <p className="text-gray-600 mb-3 text-sm">
+                Showcasing unique talents and expressing individuality.
+              </p>
+              <p className="text-gray-600 text-sm">
+                Presenting ideas clearly through speech, visuals, or performance.
+              </p>
+              <div className="absolute bottom-0 right-0 w-16 h-16 bg-secondary-600/5 rounded-tl-full"></div>
+            </div>
+          </div>
+          
+          {/* Steps to Participate */}
+          <div className="mt-20">
+            <div className="text-center mb-12">
+              <h2 className="text-2xl font-bold font-education text-gray-900">
+                Simple Steps to Participate
+              </h2>
+            </div>
+            
+            <div className="grid md:grid-cols-4 gap-6">
+              <div className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-all duration-300 text-center relative overflow-hidden">
+                <div className="absolute top-2 left-2 bg-accent text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">1</div>
+                <div className="text-3xl mb-4 mt-2 animate-float">📝</div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">Register Online</h3>
+                <p className="text-gray-600 text-sm">
+                  Fill in the registration form and select your competition category
+                </p>
+              </div>
+              
+              <div className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-all duration-300 text-center relative overflow-hidden">
+                <div className="absolute top-2 left-2 bg-primary-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">2</div>
+                <div className="text-3xl mb-4 mt-2 animate-tada">📚</div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">Prepare for Challenges</h3>
+                <p className="text-gray-600 text-sm">
+                  Practice your skills through our guidelines and resources
+                </p>
+              </div>
+              
+              <div className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-all duration-300 text-center relative overflow-hidden">
+                <div className="absolute top-2 left-2 bg-secondary-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">3</div>
+                <div className="text-3xl mb-4 mt-2 animate-pulse">🖥️</div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">Compete Virtually</h3>
+                <p className="text-gray-600 text-sm">
+                  Join live sessions, submit entries, and showcase your talent
+                </p>
+              </div>
+              
+              <div className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-all duration-300 text-center relative overflow-hidden">
+                <div className="absolute top-2 left-2 bg-indigo-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">4</div>
+                <div className="text-3xl mb-4 mt-2 animate-heartbeat">🏆</div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">Win Big</h3>
+                <p className="text-gray-600 text-sm">
+                  Earn certificates, medals, scholarships, and national recognition!
+                </p>
+              </div>
+            </div>
+            
+            <div className="mt-12 text-center">
+              <div className="flex flex-wrap gap-4 justify-center">
+                <div className="bg-amber-100 text-amber-800 font-bold px-6 py-3 rounded-full animate-pulse">
+                  🎯 Early Bird Discount
+                </div>
+                <div className="bg-emerald-100 text-emerald-800 font-bold px-6 py-3 rounded-full animate-tada">
+                  👪 Group Discount
+                </div>
+                <div className="bg-blue-100 text-blue-800 font-bold px-6 py-3 rounded-full animate-heartbeat">
+                  🎁 Surprise Package
+                </div>
+              </div>
+              <div className="mt-8">
+                <Button 
+                  size="lg" 
+                  className="bg-accent hover:bg-accent/90 text-white font-bold px-8 py-6 h-auto shadow-lg transform hover:scale-105 transition-transform duration-300"
+                  onClick={() => window.location.href = '/register'}
+                >
+                  Register Today for Exciting Offers! 🚀
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      {/* CTA Section */}
+      <section className="py-16 bg-primary-50 relative z-10">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
+          <div className="bg-white rounded-2xl shadow-xl overflow-hidden relative z-30">
+            <div className="lg:grid lg:grid-cols-2 relative z-40">
+              <div className="p-8 lg:p-12 bg-gradient-to-r from-primary-700 to-primary-900 text-white relative z-50">
+                <h2 className="text-3xl font-bold font-education mb-6">
+                  Ready to Begin Your Journey?
+                </h2>
+                <p className="text-lg text-white/80 mb-8">
+                  Join thousands of students across India who are already discovering their potential.
+                </p>
+                <ul className="space-y-4 mb-8">
+                  <li className="flex items-center">
+                    <svg className="h-5 w-5 text-accent mr-2 animate-tada" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    <span>Simple Registration Process</span>
+                  </li>
+                  <li className="flex items-center">
+                    <svg className="h-5 w-5 text-accent mr-2 animate-float" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                    <span>Access to Learning Materials</span>
+                  </li>
+                  <li className="flex items-center">
+                    <svg className="h-5 w-5 text-accent mr-2 animate-heartbeat" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21a2 2 0 012 2v7a2 2 0 01-2 2h-5.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+                    </svg>
+                    <span>Compete with the Best in India</span>
+                  </li>
+                </ul>
+              </div>
+              
+              <div className="p-8 lg:p-12 bg-white relative z-50">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6">
+                  Register Now
+                </h3>
+                <div className="space-y-4">
+                  <p className="text-gray-600">
+                    Click the button below to start your registration process. Registration is open for students from Grades 1 to 10.
+                  </p>
+                  <Button 
+                    size="lg" 
+                    className="w-full hover:bg-primary-500 transition-colors duration-300 group"
+                    onClick={() => window.location.href = '/register'}
+                  >
+                    <div className="flex items-center justify-center">
+                      <span>Start Registration</span>
+                      <svg className="h-5 w-5 ml-2 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                      </svg>
+                    </div>
+                  </Button>
+                  <p className="text-sm text-gray-500 mt-4">
+                    Need help? Contact our support team at <a href="mailto:support@ietq.in" className="text-primary-600 hover:underline">support@ietq.in</a> or call <a href="tel:+911234567890" className="text-primary-600 hover:underline">+91 1234 567 890</a>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <Footer />
+    </div>
+  );
+}
