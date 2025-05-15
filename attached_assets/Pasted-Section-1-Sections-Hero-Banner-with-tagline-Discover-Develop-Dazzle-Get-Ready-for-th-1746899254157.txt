@@ -1,0 +1,198 @@
+Section 1
+Sections:
+•	Hero Banner with tagline:  
+ "Discover. Develop. Dazzle."
+Get Ready for the Ultimate Student Showdown – IETQ is Here!
+Calling all curious thinkers, bold creators, and hidden superstars! IETQ (India’s Emerging Talent Quest) is your all-India stage to compete, collaborate, and celebrate your unique talents.
+Are you ready to rise? Join the Quest. Be the Next Talent Icon!
+
+•	Highlight: Grades Covered, Rounds, National Exposure-
+A nationwide platform where young minds from Grades 1 to 10 unlock their potential, showcase their talents, and rise as future-ready leaders!
+Through thrilling rounds of quizzes, collaborative projects, and Talent Showcase, IETQ is more than just a competition — it’s a celebration of creativity, curiosity, and confidence.
+•	Countdown Timer (if registration is open) 
+•	Footer with contact, social media, etc.
+  Know More				Register Now
+
+
+Instructions:
+•	Use dynamic visuals like kids learning, school activities, and achievements.
+•	Include animated elements or micro-interactions subtly. (Like a flash batch)
+________________________________________
+Section 2
+Sections:
+•	Vision & Objective
+Vision:
+We aim to nurture every child’s hidden potential and prepare them for a confident, capable, and creative future. IETQ helps children shine beyond textbooks through fun, skill-based learning and recognition.
+Objective:
+We strive to create learning experiences that build collaboration, critical thinking, and communication skills, to support academic goals while encouraging self-expression and holistic development.
+
+•	Eligibility (Grade 1 to 10)
+•	3 Rounds with clear infographics:
+o	Quizz Whizz
+o	Think Tank Challange
+o	Me@My Best
+•	“What You’ll Get” / “Learning Benefits”
+ Live Expert Webinars – Engage in interactive sessions led by industry professionals and education experts.
+On-Demand Learning – Access pre-recorded video lessons to learn at your own pace, anytime, anywhere.
+Curated E-Learning Material – Get high-quality digital study content tailored to each round of the competition.
+
+
+•	Get ready to be rewarded for your talent!
+IETQ offers 1000+ exciting prizes across categories — because every unique skill deserves to shine!
+🎁 What’s in store?
+•	Trophies & Medals 🏅
+•	Participation Certificates for ALL ✨
+•	Cash Prizes 💰
+•	Scholarships 🎓
+•	Gift Cards & Surprise Goodies 🎁
+•	Special Awards in Multiple Talent Categories 🌟
+And that’s not all — top performers will be featured nationwide, earning the recognition they truly deserve!
+Instructions:
+•	Use catchy pictures and graphics. 
+•	If possible make a part of this section flash
+
+Step up. Stand out. Shine across India!
+
+•	Jury / Panel Info (optional)
+Our esteemed panel includes 500+ judges and subject matter experts from diverse fields such as education, arts, STEM, design, and public speaking. Each round is evaluated by specialists to ensure fair, transparent, and skill-based judgment, giving every participant the recognition they truly deserve.
+Instructions:
+•	Use a timeline or flowchart graphic for competition rounds.
+•	Include icons and illustrations to break text.
+________________________________________
+
+Section 3
+For Students:
+•	Improve Critical Thinking, Collaboration, and Creativity
+•	Compete Nationally
+•	Awards & Certificates
+•	Media Exposure
+For Schools:
+•	Recognition as a Talent Promoter
+•	National-Level Participation Certificate
+•	Visibility on IETQ Website
+•	Networking Opportunities
+Instructions:
+•	Use grid format with icons or cards.
+•	Add a CTA: “Get Your School Onboard” or “Student Registration”
+________________________________________
+Section 4
+•	Registration Fee Structure
+•	Register Now
+•	Leads to Registration form:
+ 
+Fields to Include:
+•	Student Name 
+•	Parents/Guardians' name 
+•	Tel. No. 
+•	Email id 
+•	Address 
+•	Student's age 
+•	School name 
+•	School Location (Dropdown) 
+•	Grade, 
+•	Pay Now Button.
+
+Features to be included:
+•	Option for individual or school-coordinated registrations
+•	Form validation and confirmation message
+•	Auto-email response with unique registration ID
+•	Integrate with LMS backend to create user profile
+Instructions:
+•	Use a 2-step form for better UX if it’s long
+•	Add "Save and Continue Later" (optional)
+•	Use CAPTCHA to avoid spam
+________________________________________
+Section 5
+Sections:
+•	General Questions  FAQs (Who can participate, rounds, etc.)
+•	Registration Issues
+•	Technical Support
+•	Contact Support form (or chatbot)
+________________________________________
+Section 6
+Fields:
+•	Name, Email, Phone
+•	Message Box
+•	Query Type Dropdown (Registration/Technical/School Partnership)
+Add:
+•	Official Email
+•	Phone/WhatsApp Number
+•	Physical Office Address (if applicable)
+•	Map Embed (Google Maps)
+________________________________________
+Section 7
+Partnership Page (Optional)
+Invite schools to collaborate
+Sections:
+•	Benefits to Schools
+•	Partnership Levels (if any)
+•	MoU Download/Upload Option
+•	School Registration Form (Basic Info)
+•	Contact for Demo or Meeting
+________________________________________
+Section 8
+Privacy Policy, Terms & Conditions, Refund Policy
+Mandatory Pages for compliance
+Include:
+•	Student data privacy commitment
+•	Use of photos/videos for publicity
+•	Data sharing clauses with partners
+•	Refund conditions (if applicable)
+________________________________________
+
+Section 9
+LMS Integration (Post-registration Phase)
+Instructions for Integration:
+•	Once student registers, they should be auto-directed to create login for LMS.
+•	Unique ID should be common across LMS and registration.
+•	Skills (Dropdown), 
+•	Areas of Interest (Dropdown), 
+•	Display dashboard with:
+o	Webinar details (Schedule)
+o	Links to pre-recorded sessions
+o	Links to e-learning study material
+o	Round status (e.g., "Round 1: Completed")
+o	Download guidelines
+o	Upload project/talent video
+o	Get results and feedback
+________________________________________
+Section 10
+Connect to CRM
+Should allow:
+•	View and export student data
+•	Track registrations (by state, grade, etc.)
+•	Download reports
+•	Send bulk emails/SMS
+•	Add/edit school partnerships
+________________________________________
+FINAL CHECKLIST FOR DESIGNER
+•	Mobile responsive across devices
+•	Browser compatibility tested
+•	Connected to LMS, CRM, and tested end-to-end
+•	Secure (SSL installed)
+•	GDPR/COPPA/Indian IT compliance as needed
+•	Sitemap.xml & robots.txt setup
+•	Analytics tool integrated (Google Analytics or similar)
+
+ 
+
+
+ 
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
