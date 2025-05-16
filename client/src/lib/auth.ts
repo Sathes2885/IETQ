@@ -9,28 +9,28 @@ import { AuthResponse, LoginCredentials, RegisterData } from '@shared/types';
 export async function registerUser(userData: RegisterData): Promise<AuthResponse> {
   try {
     console.log("Registering user with data:", userData);
-    
-    // First, create user in Supabase
-    console.log('Registering with Supabase, role:', userData.role);
-    
+
+    // Build safe user metadata (all fields must be strings)
+    const metadata: Record<string, string> = {
+      role: userData.role,
+      name: userData.name,
+    };
+
+    if (userData.grade) metadata.grade = String(userData.grade);
+    if (userData.role === 'teacher') {
+      if (userData.subject) metadata.subject = userData.subject;
+      if (userData.qualification) metadata.qualification = userData.qualification;
+      if (userData.experience) metadata.experience = String(userData.experience);
+      if (userData.school) metadata.school = userData.school;
+    }
+
+    // Register with Supabase
     const { data, error } = await supabase.auth.signUp({
       email: userData.email,
       password: userData.password,
       options: {
-        data: {
-          // Store role and other data in Supabase user metadata
-          role: userData.role,
-          name: userData.name,
-          grade: userData.grade,
-          // Include teacher specific fields if applicable
-          ...(userData.role === 'teacher' && {
-            subject: userData.subject,
-            qualification: userData.qualification,
-            experience: userData.experience,
-            school: userData.school
-          })
-        }
-      }
+        data: metadata,
+      },
     });
 
     if (error) {
@@ -40,7 +40,7 @@ export async function registerUser(userData: RegisterData): Promise<AuthResponse
 
     console.log("Supabase registration successful:", data);
 
-    // Then, create user profile in our database
+    // Register user in your backend DB
     const response = await apiRequest('POST', '/api/auth/register', {
       ...userData,
       supabaseUserId: data.user?.id,
@@ -54,7 +54,7 @@ export async function registerUser(userData: RegisterData): Promise<AuthResponse
 
     const userProfile = await response.json();
     console.log("User profile created successfully:", userProfile);
-    
+
     return {
       user: userProfile,
       token: data.session?.access_token,
@@ -70,13 +70,11 @@ export async function registerUser(userData: RegisterData): Promise<AuthResponse
 
 /**
  * Login a user
- * @param credentials User login credentials
  */
 export async function loginUser(credentials: LoginCredentials): Promise<AuthResponse> {
   try {
     console.log("Attempting login with:", credentials.email);
-    
-    // Login with Supabase
+
     const { data, error } = await supabase.auth.signInWithPassword({
       email: credentials.email,
       password: credentials.password,
@@ -86,20 +84,16 @@ export async function loginUser(credentials: LoginCredentials): Promise<AuthResp
       console.error("Supabase login error:", error);
       throw new Error(error.message);
     }
-    
-    console.log("Login result:", {success: true, error: "none", hasToken: !!data.session?.access_token});
-    
-    // Get user metadata from Supabase
+
+    console.log("Login result:", {
+      success: true,
+      hasToken: !!data.session?.access_token,
+    });
+
     const { data: userData } = await supabase.auth.getUser();
     console.log("Supabase user metadata:", userData?.user?.user_metadata);
-    
-    // Check user role from metadata
-    const roleFromMetadata = userData?.user?.user_metadata?.role;
-    console.log("User role from Supabase metadata:", roleFromMetadata);
 
-    // Get user profile from our database
     const response = await apiRequest('GET', '/api/auth/me');
-    
     if (!response.ok) {
       const errorData = await response.json();
       console.error("API me error:", errorData);
@@ -108,7 +102,7 @@ export async function loginUser(credentials: LoginCredentials): Promise<AuthResp
 
     const userProfile = await response.json();
     console.log("User profile retrieved:", userProfile);
-    
+
     return {
       user: userProfile,
       token: data.session?.access_token,
@@ -128,35 +122,30 @@ export async function loginUser(credentials: LoginCredentials): Promise<AuthResp
 export async function logoutUser(): Promise<{ success: boolean, error?: string }> {
   try {
     console.log("Attempting to log out user");
-    
-    // Logout from Supabase
+
     const { error } = await supabase.auth.signOut();
     if (error) {
       console.error("Supabase logout error:", error);
       throw new Error(error.message);
     }
 
-    // Clear all relevant cached data
     console.log("Clearing cached user data");
     localStorage.removeItem('user');
     localStorage.removeItem('queryData');
     sessionStorage.clear();
-    
-    // Logout from our server
+
     const response = await apiRequest('POST', '/api/auth/logout');
-    
     if (!response.ok) {
       const errorData = await response.json();
       console.error("API logout error:", errorData);
       throw new Error(errorData.message || 'Logout failed');
     }
 
-    // Force page reload to clear any React Query cache and reset app state
     console.log("Logout successful - refreshing application state");
     setTimeout(() => {
       window.location.href = '/';
     }, 100);
-    
+
     return { success: true };
   } catch (error) {
     console.error('Logout error:', error);
@@ -173,18 +162,17 @@ export async function logoutUser(): Promise<{ success: boolean, error?: string }
 export async function isAuthenticated(): Promise<boolean> {
   try {
     console.log("Checking if user is authenticated");
-    
+
     const { data } = await supabase.auth.getSession();
-    
     if (!data.session) {
       console.log("No Supabase session found");
       return false;
     }
-    
+
     const response = await apiRequest('GET', '/api/auth/me');
     const isAuth = response.ok;
-    
     console.log("Authentication check result:", isAuth);
+
     return isAuth;
   } catch (error) {
     console.error('Auth check error:', error);
@@ -198,24 +186,21 @@ export async function isAuthenticated(): Promise<boolean> {
 export async function getCurrentUser(): Promise<AuthResponse> {
   try {
     console.log("Getting current user profile");
-    
+
     const { data } = await supabase.auth.getSession();
-    
     if (!data.session) {
       console.log("No Supabase session found");
       return { user: null };
     }
-    
-    // Check if we have user data cached in localStorage
+
     const existingUserCache = localStorage.getItem('user');
     if (existingUserCache) {
       const user = JSON.parse(existingUserCache);
       console.log("Using cached user data:", user);
       return { user, token: data.session.access_token };
     }
-    
+
     const response = await apiRequest('GET', '/api/auth/me');
-    
     if (!response.ok) {
       console.error("Error fetching user profile:", response.statusText);
       throw new Error('Failed to get user profile');
@@ -223,8 +208,7 @@ export async function getCurrentUser(): Promise<AuthResponse> {
 
     const userProfile = await response.json();
     console.log("User profile retrieved:", userProfile);
-    
-    // Check if user role has changed
+
     const previousUserCache = localStorage.getItem('user');
     if (previousUserCache) {
       const parsedCache = JSON.parse(previousUserCache);
@@ -232,10 +216,8 @@ export async function getCurrentUser(): Promise<AuthResponse> {
         console.log(`User role changed from ${parsedCache.role} to ${userProfile.role}`);
       }
     }
-    
-    // Cache the most recent user data in localStorage
+
     localStorage.setItem('user', JSON.stringify(userProfile));
-    
     return {
       user: userProfile,
       token: data.session.access_token,
