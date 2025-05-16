@@ -18,7 +18,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 
-// Zod Schemas
+// Define Zod schemas
 const loginSchema = z.object({
   email: z.string().email('Enter a valid email'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
@@ -51,7 +51,7 @@ export default function AuthForm({ type, defaultRole = 'student' }: AuthFormProp
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const form = useForm<LoginFormValues | RegisterFormValues>({
+  const form = useForm<RegisterFormValues | LoginFormValues>({
     resolver: zodResolver(type === 'login' ? loginSchema : registerSchema),
     defaultValues: type === 'login'
       ? { email: '', password: '' }
@@ -91,7 +91,7 @@ export default function AuthForm({ type, defaultRole = 'student' }: AuthFormProp
         setLocation(`/${result.user.role}/dashboard`);
       } else {
         const payload: RegisterData = {
-          ...data,
+          ...(data as RegisterFormValues),
           grade: selectedRole === 'student' ? data.grade : undefined,
           subject: selectedRole === 'teacher' ? data.subject : undefined,
           qualification: selectedRole === 'teacher' ? data.qualification : undefined,
