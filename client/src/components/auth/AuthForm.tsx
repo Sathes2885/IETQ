@@ -1,98 +1,306 @@
-'use client';
-
+import { useState } from 'react';
+import { useLocation } from 'wouter';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { signIn } from 'next-auth/react';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { z } from 'zod';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import {
+  Form, FormControl, FormField, FormItem, FormLabel, FormMessage,
+} from '@/components/ui/form';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
+import { registerUser, loginUser } from '@/lib/auth';
+import { useQueryClient } from '@tanstack/react-query';
+import { RegisterData } from '@shared/types';
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from '@/components/ui/select';
 
+// Zod Schemas
 const loginSchema = z.object({
-  email: z
-    .string()
-    .min(1, { message: 'Email is required' })
-    .email({ message: 'Invalid email format. Please enter a valid email.' }),
-  password: z
-    .string()
-    .min(8, { message: 'Password must be at least 8 characters long.' }),
+  email: z.string().email('Enter a valid email'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
 });
 
-type LoginFormData = z.infer<typeof loginSchema>;
+const registerSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  email: z.string().email('Enter a valid email'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+  role: z.enum(['student', 'teacher', 'admin']),
+  grade: z.string().optional(),
+  subject: z.string().optional(),
+  qualification: z.string().optional(),
+  experience: z.string().optional(),
+  school: z.string().optional(),
+});
 
-export default function AuthForm() {
-  const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
+type LoginFormValues = z.infer<typeof loginSchema>;
+type RegisterFormValues = z.infer<typeof registerSchema>;
 
-  const form = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-    },
+interface AuthFormProps {
+  type: 'login' | 'register';
+  defaultRole?: 'student' | 'teacher' | 'admin';
+}
+
+export default function AuthForm({ type, defaultRole = 'student' }: AuthFormProps) {
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const form = useForm<LoginFormValues | RegisterFormValues>({
+    resolver: zodResolver(type === 'login' ? loginSchema : registerSchema),
+    defaultValues: type === 'login'
+      ? { email: '', password: '' }
+      : {
+          name: '',
+          email: '',
+          password: '',
+          role: defaultRole,
+          grade: '',
+          subject: '',
+          qualification: '',
+          experience: '',
+          school: '',
+        },
   });
 
-  const onSubmit = async (data: LoginFormData) => {
-    setError(null);
-    const result = await signIn('credentials', {
-      redirect: false,
-      email: data.email.trim(),
-      password: data.password,
-    });
+  const selectedRole = form.watch('role');
+  const showGrade = type === 'register' && selectedRole === 'student';
+  const showTeacherFields = type === 'register' && selectedRole === 'teacher';
 
-    if (result?.error) {
-      setError('Login failed: Invalid email or password');
-    } else {
-      router.push('/dashboard'); // Change to your landing route after login
+  const onSubmit = async (data: LoginFormValues | RegisterFormValues) => {
+    setLoading(true);
+
+    try {
+      if (type === 'login') {
+        const result = await loginUser(data as LoginFormValues);
+        if (result.error || !result.user) throw new Error(result.error || 'User not found');
+
+        await queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
+        queryClient.refetchQueries({ queryKey: ['/api/auth/me'] });
+
+        toast({
+          title: 'Login successful',
+          description: `Welcome back, ${result.user.name}!`,
+        });
+
+        setLocation(`/${result.user.role}/dashboard`);
+      } else {
+        const payload: RegisterData = {
+          ...data,
+          grade: selectedRole === 'student' ? data.grade : undefined,
+          subject: selectedRole === 'teacher' ? data.subject : undefined,
+          qualification: selectedRole === 'teacher' ? data.qualification : undefined,
+          experience: selectedRole === 'teacher' ? data.experience : undefined,
+          school: selectedRole === 'teacher' ? data.school : undefined,
+        };
+
+        const result = await registerUser(payload);
+        if (result.error || !result.user) throw new Error(result.error || 'User not created');
+
+        await queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
+        queryClient.refetchQueries({ queryKey: ['/api/auth/me'] });
+
+        toast({
+          title: 'Registration successful',
+          description: `Welcome, ${result.user.name}!`,
+        });
+
+        setLocation(`/${result.user.role}/dashboard`);
+      }
+    } catch (err) {
+      toast({
+        title: `${type === 'login' ? 'Login' : 'Registration'} failed`,
+        description: err instanceof Error ? err.message : 'An unexpected error occurred',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 border border-gray-300 rounded-lg shadow-md">
-      <h2 className="text-2xl font-semibold mb-6 text-center">Login</h2>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            {...form.register('email')}
-            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-          />
-          {form.formState.errors.email && (
-            <p className="text-red-500 text-sm mt-1">
-              {form.formState.errors.email.message}
-            </p>
+    <Card className="w-full max-w-md mx-auto">
+      <CardHeader>
+        <CardTitle>{type === 'login' ? 'Login' : 'Register for IETQ'}</CardTitle>
+        <CardDescription>
+          {type === 'login'
+            ? 'Enter your credentials to access your account'
+            : 'Create your free account to get started'}
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+
+            {type === 'register' && (
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Full Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="John Doe" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input type="email" placeholder="you@example.com" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Input type={showPassword ? 'text' : 'password'} placeholder="••••••••" {...field} />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-0 top-0 h-full px-3"
+                        onClick={() => setShowPassword(prev => !prev)}
+                      >
+                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </Button>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {type === 'register' && (
+              <>
+                <FormField
+                  control={form.control}
+                  name="role"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Role</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select your role" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="student">Student</SelectItem>
+                          <SelectItem value="teacher">Teacher</SelectItem>
+                          <SelectItem value="admin">Admin</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {showGrade && (
+                  <FormField
+                    control={form.control}
+                    name="grade"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Grade</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select grade" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {Array.from({ length: 10 }, (_, i) => (
+                              <SelectItem key={i + 1} value={(i + 1).toString()}>
+                                Grade {i + 1}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+
+                {showTeacherFields && (
+                  <div className="space-y-4 mt-4 p-4 border border-blue-200 bg-blue-50 rounded-md">
+                    <div className="text-sm font-semibold text-blue-700 mb-2">Teacher Information</div>
+
+                    {['subject', 'qualification', 'experience', 'school'].map((fieldKey) => (
+                      <FormField
+                        key={fieldKey}
+                        control={form.control}
+                        name={fieldKey as keyof RegisterFormValues}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="capitalize">{fieldKey}</FormLabel>
+                            <FormControl>
+                              <Input placeholder={`Enter ${fieldKey}`} {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+
+            <Button type="submit" disabled={loading} className="w-full mt-6">
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {type === 'login' ? 'Logging in...' : 'Creating account...'}
+                </>
+              ) : (
+                type === 'login' ? 'Login' : 'Register'
+              )}
+            </Button>
+          </form>
+        </Form>
+      </CardContent>
+      <CardFooter className="flex justify-center">
+        <p className="text-sm text-gray-600">
+          {type === 'login' ? (
+            <>
+              Don't have an account?{' '}
+              <Button variant="link" className="p-0" onClick={() => setLocation('/register')}>
+                Register
+              </Button>
+            </>
+          ) : (
+            <>
+              Already have an account?{' '}
+              <Button variant="link" className="p-0" onClick={() => setLocation('/login')}>
+                Login
+              </Button>
+            </>
           )}
-        </div>
-
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-            Password
-          </label>
-          <input
-            id="password"
-            type="password"
-            {...form.register('password')}
-            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-          />
-          {form.formState.errors.password && (
-            <p className="text-red-500 text-sm mt-1">
-              {form.formState.errors.password.message}
-            </p>
-          )}
-        </div>
-
-        {error && <p className="text-red-600 text-sm">{error}</p>}
-
-        <button
-          type="submit"
-          className="w-full py-2 px-4 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 focus:outline-none"
-        >
-          Login
-        </button>
-      </form>
-    </div>
+        </p>
+      </CardFooter>
+    </Card>
   );
 }
